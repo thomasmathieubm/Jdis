@@ -305,22 +305,4 @@ int rfree(void *p) {
 		distance de jacquard : 1 - (inter / union) = 1 - (3 / 5) = 0,4
 
 
-	erreur dans l'algo :
-		le programme doit pouvoir afficher quel mot apartient à quel fichiers
-		donc il faut sauvegarder le mot et chaque fichiers dans le quel il apparait
-
-		idée :
-			-un tableau de bool en guise de valeur : ou chaque case correspond à un 
-			fichier. mais c'est couteux, ça veux dire dans chaque mot -> chaque case
-			de la HT y'aura un tableau du nombre de fichier ? ça fait bcp .. genre pour
-			les misérables c'est pas possible quoi
-
-			-une liste chainée ou chaque cellule contient un numero de fichier
-			je pense que c'est la bonne solution
-
-
-
-IDEE : si l'option -g activé on active la structure avec tableau dynamique, sinon
-non bah on met rien et on economise de la place
-	
 */
