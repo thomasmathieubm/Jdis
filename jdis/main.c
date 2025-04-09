@@ -22,14 +22,14 @@ struct file_info {
   size_t card;
 };
 
- //  ----------------------- Déclaration ---------------------------------------
+//  ----------------------- Déclaration ---------------------------------------
 int rfree(void *p);
 
 int file_info_dispose(void *p);
 
 size_t str_hashfun(const char *s);
 
-int display(const char *str);
+//int display(const char *str);
 
 FILE *get_input_type(char **av, int i);
 
@@ -37,9 +37,7 @@ bool is_word_from_diff_file(file_info *p, int current_file);
 
 int display_graph_option(const char *str, file_info *p);
 
- //  ---------------------- Spécification --------------------------------------
- //main : renvoie succès si le nombre d'argument passé en paramètre est
- //   inférieur ou égale à 1.
+//  ---------------------- Spécification --------------------------------------
 int main(int ac, char **av) {
   int r = EXIT_SUCCESS;
   if (ac <= 1) {
@@ -62,9 +60,7 @@ int main(int ac, char **av) {
   }
   // file_num : représente le numero du fichier lu, l'adresse du début du
   //    tableau est inutilisée pour simplifier les calculs d'indices
-
   //  char file_num[MAX_FILE_NUM + 1];
-
   // current_file : représente le fichier entrain d'être traité
   // current_file = ac - 1 - le nombre d'options
   // current_arg :  représente l'argument entrain d'être traité
@@ -176,7 +172,7 @@ int main(int ac, char **av) {
       clearerr(f);
       printf("--- ends reading for #%d FILE\n", current_arg);
     }
-    //passe au prochain fichier
+    // Avance jusqu'à la prochaine entrée
     ++current_arg;
     ++current_file;
   }
@@ -185,18 +181,19 @@ int main(int ac, char **av) {
     printf("%s\t", av[i]);
   }
   printf("\n");
-  //affiche les mots qui ont été lu
+  // Affichage des mots lus
   // holdall_apply(ha, (int (*)(void *))display);
   if (holdall_apply_context(ha0, ht,
         (void *(*)(void *, void *)) hashtable_search,
         (int (*)(void *, void *)) display_graph_option) != 0) {
     goto dispose;
   }
-  printf("intersection : %f\n", _intersect);
-  printf("union : %f\n", _union);
-  printf("distance de jacquard : %f\n", (1.0 - (_intersect / _union)));
+  printf("Intersection : %0.0f\n", _intersect);
+  printf("Union : %0.0f\n", _union);
+  printf("Distance de jacquard : %0.4f\n", (1.0 - (_intersect / _union)));
   free(buff);
   goto dispose;
+  //----------------------- Etiquettes ----------------------------------------
 error_read:
   fprintf(stderr, "*** Error: A read error occurs\n");
   goto error;
@@ -212,10 +209,10 @@ error:
   goto dispose;
 dispose:
   hashtable_dispose(&ht);
-  if (ha0 != NULL) {
+  if (ha0 != nullptr) {
     holdall_apply(ha0, rfree);
   }
-  if (ha1 != NULL) {
+  if (ha1 != nullptr) {
     holdall_apply(ha1, file_info_dispose);
   }
   holdall_dispose(&ha0);
@@ -223,9 +220,11 @@ dispose:
   return r;
 }
 
+// file_info_dispose : sans effet si p vaut nullptr, libère sinon les ressources
+//    allouées à la structure des caractéristiques des mots
 int file_info_dispose(void *p) {
   file_info *q = p;
-  if (q != NULL) {
+  if (q != nullptr) {
     free(q->file_nums);
     free(q);
   }
@@ -238,7 +237,8 @@ int display_graph_option(const char *str, file_info *p) {
     for (int j = 1; j < p->file_nums[i]; ++j) {
       printf("\t");
     }
-    printf("%d", p->file_nums[i]);
+    //printf("%d", p->file_nums[i]);
+    printf("x");
   }
   printf("\n");
   return 0;
@@ -255,6 +255,9 @@ bool is_word_from_diff_file(file_info *p, int current_file) {
   return true;
 }
 
+// get_input_type : renvoie un pointeur vers l'entrée standard si l'argument
+//    est "-", vers un fichier si l'argument est un fichier valide, une erreur
+//    sinon
 FILE *get_input_type(char **av, int i) {
   // Dans le cas du tiret simple ouvre l'entrée standard.
   if (strcmp(av[i], INPUT_DIRECT) == 0) {
@@ -272,11 +275,13 @@ FILE *get_input_type(char **av, int i) {
   return f;
 }
 
-int display(const char *str) {
-  printf("%s\n", str);
-  return 0;
-}
+//int display(const char *str) {
+  //printf("%s\n", str);
+  //return 0;
+//}
 
+// str_hashfun : fonction de hashage, renvoie le code de hashage correspondant
+//    à la chaîne de caractères passée en parametre
 size_t str_hashfun(const char *s) {
   size_t h = 0;
   for (const unsigned char *p = (const unsigned char *) s; *p != '\0'; ++p) {
