@@ -22,6 +22,14 @@ struct file_info {
   size_t card;
 };
 
+//-----------------------------MANQUANT----------------------------------------
+//FAIT- Option -iVALUE : fixe la longueure maximale d'un mot à VALUE
+//FAIT- Option -g : affiche le résultat graphique sous forme d'un tableau
+//    - Affichage : affiche "-" pour l'absence d'un mot dans un fichier
+//    - Option -h : affichage de l'aide
+//    - Option -p : Affecte au symboles de ponctuation le même rôle que les
+//                  caractères de la classe isspace
+
 //  ----------------------- Déclaration ---------------------------------------
 int rfree(void *p);
 
@@ -39,6 +47,8 @@ int display_graph_option(const char *str, file_info *p);
 
 //  ---------------------- Spécification --------------------------------------
 int main(int ac, char **av) {
+  bool graph_option = false;
+  long int max_word_length = -1;
   int r = EXIT_SUCCESS;
   if (ac <= 1) {
     return r;
@@ -64,17 +74,30 @@ int main(int ac, char **av) {
   // current_file : représente le fichier entrain d'être traité
   // current_file = ac - 1 - le nombre d'options
   // current_arg :  représente l'argument entrain d'être traité
+  int param_count = 0;
   int current_file = 1;
   int current_arg = 1;
   float _intersect = 0;
   float _union = 0;
+  for (int i = 1; i < ac; i++) {
+    if (strcmp(av[i], "-g") == 0) {
+      graph_option = true;
+      current_arg++;
+      param_count++;
+    } else if (strncmp(av[i], "-i", 2) == 0) {
+      char *endptr;
+      max_word_length = strtol(av[i] + 2, &endptr, 10);
+      current_arg++;
+      param_count++;
+    }
+  }
   while (current_arg < ac) {
     FILE *f = get_input_type(av, current_arg);
     if (f == nullptr) {
       goto error_read;
     }
     if (f == stdin) {
-      printf("--- starts reading for #%d FILE\n", current_arg);
+      printf("--- starts reading for #%d FILE\n", current_arg - param_count);
     } else {
       if (strcmp(av[current_arg], INPUT_FILE_NEXT) == 0) {
         ++current_arg;
@@ -99,7 +122,16 @@ int main(int ac, char **av) {
         }
         // i > 0 assure que les chaines allouées ne sont pas vides
         if (i > 0) {
-          buff[i] = '\0'; // Ajout du marqueur de fin de chaîne
+          // Ajout du marqueur de fin de chaîne
+          buff[i] = '\0';
+          // Si l'option -i est renseignée alors max_word_lenght est différent
+          //    de -1 :
+          //        - on coupe donc le mot à la longueur max_word_length
+          //        - on met à jour la taille du mot coupé
+          if (max_word_length != -1 && (int)strlen(buff) > max_word_length) {
+            buff[max_word_length] = '\0';
+            i = (size_t) max_word_length;
+          }
           // clé = str, valeur = numero de fichier
           // Si le mot n'est pas dans la table de hashage, il est ajouté et
           //    l'union est incrémenté.
@@ -170,27 +202,40 @@ int main(int ac, char **av) {
       }
     } else {
       clearerr(f);
-      printf("--- ends reading for #%d FILE\n", current_arg);
+      printf("--- ends reading for #%d FILE\n", current_arg - param_count);
     }
     // Avance jusqu'à la prochaine entrée
     ++current_arg;
     ++current_file;
   }
-  printf("\t");
-  for (int i = 1; i < ac; ++i) {
-    printf("%s\t", av[i]);
-  }
-  printf("\n");
   // Affichage des mots lus
   // holdall_apply(ha, (int (*)(void *))display);
-  if (holdall_apply_context(ha0, ht,
-        (void *(*)(void *, void *)) hashtable_search,
-        (int (*)(void *, void *)) display_graph_option) != 0) {
-    goto dispose;
+  if (graph_option) {
+    printf("\t");
+    for (int i = 2; i < ac; ++i) {
+      if (strncmp(av[i], "-i", 2) == 0) {
+        ++i;
+      }
+      printf("%s\t", av[i]);
+    }
+    printf("\n");
+    if (holdall_apply_context(ha0, ht,
+          (void *(*)(void *, void *)) hashtable_search,
+          (int (*)(void *, void *)) display_graph_option) != 0) {
+      goto dispose;
+    }
+  } else {
+    //printf("Intersection : %0.0f\n", _intersect);
+    //printf("Union : %0.0f\n", _union);
+    //printf("Distance de jacquard : %0.4f\n", (1.0 - (_intersect / _union)));
+    printf("%0.4f\t", (1.0 - (_intersect / _union)));
+    for (int i = 1; i < ac; ++i) {
+      if (strncmp(av[i], "-i", 2) == 0) {
+        ++i;
+      }
+      printf("%s\t", av[i]);
+    }
   }
-  printf("Intersection : %0.0f\n", _intersect);
-  printf("Union : %0.0f\n", _union);
-  printf("Distance de jacquard : %0.4f\n", (1.0 - (_intersect / _union)));
   free(buff);
   goto dispose;
   //----------------------- Etiquettes ----------------------------------------
@@ -237,7 +282,6 @@ int display_graph_option(const char *str, file_info *p) {
     for (int j = 1; j < p->file_nums[i]; ++j) {
       printf("\t");
     }
-    //printf("%d", p->file_nums[i]);
     printf("x");
   }
   printf("\n");
