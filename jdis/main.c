@@ -1,19 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "hashtable.h"
-#include "holdall.h"
+#include <stdint.h>
 #include <locale.h>
 #include <ctype.h>
+#include "hashtable.h"
+#include "holdall.h"
 
-#define BUFF_SIZE_MIN 100
-
-#define MAX_FILE_NUM 100
+#define BUFF_SIZE 100
 
 #define INPUT_DIRECT "-"
 #define INPUT_FILE_NEXT "--"
 
 #define CAPACITY_MIN 2
+#define CAPACITY_MUL 2
 
 typedef struct file_info file_info;
 struct file_info {
@@ -22,29 +22,97 @@ struct file_info {
   size_t card;
 };
 
+<<<<<<< HEAD
+//jpair : stock les info utiles pour le calcul de la distance
+//    de chaque paire de combinaison de fichiers
+typedef struct jpair jpair;
+struct jpair {
+  int un;
+  int in;
+  float jdist;
+};
+
+//jpair_control sert à stocker le tableau des combinaisons + sa taille
+//    (utile pour la passer en parametre à la fonction calc_jdist car on peu
+//      pas changer le prototype de la fonction parce-qu'elle est utilisé
+//      dans holdall_applycontext2)
+typedef struct jpair_control jpair_control;
+struct jpair_control {
+  jpair *arr;
+  int nfiles;
+  int card;
+};
+
+//  -----------------------------MANQUANT--------------------------------------
+=======
 //-----------------------------MANQUANT----------------------------------------
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
 //FAIT- Option -iVALUE : fixe la longueure maximale d'un mot à VALUE
 //FAIT- Option -g : affiche le résultat graphique sous forme d'un tableau
 //    - Affichage : affiche "-" pour l'absence d'un mot dans un fichier
 //    - Option -h : affichage de l'aide
 //    - Option -p : Affecte au symboles de ponctuation le même rôle que les
 //                  caractères de la classe isspace
+<<<<<<< HEAD
+
+//    - Faire en sorte que le mot soit coupé si on atteint BUFF_SIZE
+//      on doit couper et continuer de lire dans un nouveau mot
+
+//    - Regler l'entrée au clavier ça bug
+//  ----------------------- Spécifications & déclarations  --------------------
+
+//  rfree : libère le pointeur associé à p.
+int rfree(void *p);
+
+// file_info_dispose : sans effet si p vaut nullptr, libère sinon les ressources
+//    allouées à la structure des caractéristiques des mots
+int file_info_dispose(void *p);
+=======
 
 //  ----------------------- Déclaration ---------------------------------------
 int rfree(void *p);
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
 
-int file_info_dispose(void *p);
-
+//  str_hashfun : l'une des fonctions de pré-hachage conseillées par Kernighan
+//    et Pike pour les chaines de caractères.
 size_t str_hashfun(const char *s);
 
+<<<<<<< HEAD
+// get_input_type : renvoie un pointeur vers l'entrée standard si l'argument
+// est "-", vers un fichier si l'argument est un fichier valide, le pointeur nul
+// dans le cas contraire.
+FILE *get_input_type(char **av, int i);
+
+//  renvoie vrai si l'entier current_file est présent dans le tableau de numéros
+//  de fichiers du pointeur associé à p, faux sinon.
+bool is_in_file(file_info *p, int current_file);
+=======
 //int display(const char *str);
 
 FILE *get_input_type(char **av, int i);
 
 bool is_word_from_diff_file(file_info *p, int current_file);
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
 
+//  display_graph_option : affiche sur l'entrée standart le nom du fichier
+//  associé à str ainsi que l'appartenance ou non aux différents fichiers lus et
+//  renvoie 0
 int display_graph_option(const char *str, file_info *p);
 
+<<<<<<< HEAD
+//  calc_jdist : calcul pour chaque combinaisons de paires de fichiers lus,
+//    leur intersections, unions ainsi que le calcul de la distance de jacquard
+//    renvoie 
+int calc_jdist(jpair_control *q, const char *str, file_info *p);
+
+int main(int ac, char **av) {
+  int r = EXIT_SUCCESS;
+  if (ac <= 2) {
+    return r;
+  }
+  bool graph_option = false;
+  long int max_word_length = -1;
+=======
 //  ---------------------- Spécification --------------------------------------
 int main(int ac, char **av) {
   bool graph_option = false;
@@ -53,6 +121,7 @@ int main(int ac, char **av) {
   if (ac <= 1) {
     return r;
   }
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
   // setlocale : définit la règle de comparaison des chaînes de caractères
   // utilisée par strcoll.
   setlocale(LC_COLLATE, "");
@@ -64,6 +133,12 @@ int main(int ac, char **av) {
     goto error_capacity;
   }
   //buff : buffer qui stocke progressivement les lettres lus
+<<<<<<< HEAD
+  char *buff = malloc(BUFF_SIZE + 1);
+  if (buff == nullptr) {
+    goto error_capacity;
+  }
+=======
   char *buff = malloc(BUFF_SIZE_MIN + 1);
   if (buff == nullptr) {
     goto error_capacity;
@@ -71,14 +146,18 @@ int main(int ac, char **av) {
   // file_num : représente le numero du fichier lu, l'adresse du début du
   //    tableau est inutilisée pour simplifier les calculs d'indices
   //  char file_num[MAX_FILE_NUM + 1];
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
   // current_file : représente le fichier entrain d'être traité
   // current_file = ac - 1 - le nombre d'options
   // current_arg :  représente l'argument entrain d'être traité
   int param_count = 0;
   int current_file = 1;
   int current_arg = 1;
+<<<<<<< HEAD
+=======
   float _intersect = 0;
   float _union = 0;
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
   for (int i = 1; i < ac; i++) {
     if (strcmp(av[i], "-g") == 0) {
       graph_option = true;
@@ -106,7 +185,10 @@ int main(int ac, char **av) {
           goto error;
         }
       }
+<<<<<<< HEAD
+=======
       printf("--- starts reading for \"%s\"\n", av[current_arg]);
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
     }
     //i : indice du buffer
     size_t i = 0;
@@ -122,12 +204,21 @@ int main(int ac, char **av) {
         }
         // i > 0 assure que les chaines allouées ne sont pas vides
         if (i > 0) {
+<<<<<<< HEAD
+=======
           // Ajout du marqueur de fin de chaîne
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
           buff[i] = '\0';
           // Si l'option -i est renseignée alors max_word_lenght est différent
           //    de -1 :
           //        - on coupe donc le mot à la longueur max_word_length
           //        - on met à jour la taille du mot coupé
+<<<<<<< HEAD
+          if (max_word_length != -1 && (int)i > max_word_length) {
+            buff[max_word_length] = '\0';
+            i = (size_t) max_word_length;
+          }
+=======
           if (max_word_length != -1 && (int)strlen(buff) > max_word_length) {
             buff[max_word_length] = '\0';
             i = (size_t) max_word_length;
@@ -135,19 +226,30 @@ int main(int ac, char **av) {
           // clé = str, valeur = numero de fichier
           // Si le mot n'est pas dans la table de hashage, il est ajouté et
           //    l'union est incrémenté.
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
           file_info *p = hashtable_search(ht, buff);
           if (p == nullptr) {
             p = malloc(sizeof *p);
             if (p == nullptr) {
               goto error_capacity;
             }
+<<<<<<< HEAD
+            // file_nums : tableau d'entier pour sauvegarder les fichiers
+            //  dans lesquels le mot apparait
+=======
             // Le mot étant nouveau : allocation de la mémoire pour un tableau
             //    d'entiers qui contient les numéros des fichiers dans lesquels
             //    le mot est présent
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
             p->file_nums = malloc(sizeof *p->file_nums * CAPACITY_MIN);
             if (p->file_nums == nullptr) {
               goto error_capacity;
             }
+<<<<<<< HEAD
+            p->file_nums[0] = current_file;
+            p->card = 1;
+            p->capacity = CAPACITY_MIN;
+=======
             // Le premier élément du tableau file_nums est donc le numéro du
             //    fichier courant
             p->file_nums[0] = current_file;
@@ -155,6 +257,7 @@ int main(int ac, char **av) {
             p->card = 1;
             p->capacity = CAPACITY_MIN;
             // Allocation mémoire pour le mot courant
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
             char *t = malloc(i + 1);
             if (t == nullptr) {
               goto error_capacity;
@@ -169,6 +272,24 @@ int main(int ac, char **av) {
             if (hashtable_add(ht, t, p) == NULL) {
               goto error_capacity;
             }
+<<<<<<< HEAD
+          } else {
+            if (p->card == p->capacity) {
+              if (p->capacity * sizeof *p->file_nums > SIZE_MAX / CAPACITY_MUL) {
+                goto dispose;
+              }
+              int *q = realloc(p->file_nums, 
+                p->capacity * CAPACITY_MUL * sizeof *p->file_nums);
+              if (q == NULL) {
+                goto dispose;
+              }
+              p->file_nums = q;
+              p->capacity *= CAPACITY_MUL;
+            }
+            //si on a déjà lu ce mot dans ce fichier, on fait rien
+            //sinon, on ajoute le nouveau fichier dans lequel il apparait
+            if (p->file_nums[p->card - 1] != current_file) {
+=======
             ++_union;
           } else {
             // Si le mot existe dans la table de hashage, on regarde s'il
@@ -178,6 +299,7 @@ int main(int ac, char **av) {
             //      - ajout du numéro du fichier à file_nums
             if (is_word_from_diff_file(p, current_file)) {
               ++_intersect;
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
               p->file_nums[p->card] = current_file;
               p->card += 1;
               hashtable_add(ht, buff, p);
@@ -192,7 +314,10 @@ int main(int ac, char **av) {
       ++i;
     }
     if (f != stdin) {
+<<<<<<< HEAD
+=======
       // Test si l'entièreté du fichier a bien été lu
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
       if (!feof(f)) {
         goto error_read;
       }
@@ -208,8 +333,12 @@ int main(int ac, char **av) {
     ++current_arg;
     ++current_file;
   }
+<<<<<<< HEAD
+  // Affichage des mots lus pour l'option graph
+=======
   // Affichage des mots lus
   // holdall_apply(ha, (int (*)(void *))display);
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
   if (graph_option) {
     printf("\t");
     for (int i = 2; i < ac; ++i) {
@@ -224,6 +353,35 @@ int main(int ac, char **av) {
           (int (*)(void *, void *)) display_graph_option) != 0) {
       goto dispose;
     }
+<<<<<<< HEAD
+  }
+  jpair_control *jc = malloc(sizeof *jc);
+  if (jc == NULL) {
+    goto dispose;
+  }
+  //nombre de combinaison pour n fichiers = binome de newton (n(n - 1))/2
+  // 2 < ac 
+  jc->nfiles = ac ;
+  jc->card = ((ac-1) * (ac-2))/2;
+  //calloc = alloue et initialise à O toutes les cases
+  jc->arr = calloc((size_t)jc->card, sizeof *jc->arr);
+  if (jc->arr == NULL) {
+      goto dispose;
+  }
+  holdall_apply_context2(ha0, ht, (void *(*)(void *, void *)) hashtable_search,
+    jc, (int (*)(void *, void *, void *)) calc_jdist);
+  size_t k = 0;
+  for (int i = 1; i < ac; ++i) {
+    for(int j = i + 1; j < ac; ++j) {
+      printf("%.4f\t%s\t%s\n", jc->arr[k].jdist, av[i], av[j]);
+      ++k;
+    }
+  }
+  free(jc->arr);
+  free(jc);
+  free(buff);
+  goto dispose;
+=======
   } else {
     //printf("Intersection : %0.0f\n", _intersect);
     //printf("Union : %0.0f\n", _union);
@@ -239,6 +397,7 @@ int main(int ac, char **av) {
   free(buff);
   goto dispose;
   //----------------------- Etiquettes ----------------------------------------
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
 error_read:
   fprintf(stderr, "*** Error: A read error occurs\n");
   goto error;
@@ -265,8 +424,14 @@ dispose:
   return r;
 }
 
+<<<<<<< HEAD
+//  ---------------------- Définitions --------------------------------------
+
+
+=======
 // file_info_dispose : sans effet si p vaut nullptr, libère sinon les ressources
 //    allouées à la structure des caractéristiques des mots
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
 int file_info_dispose(void *p) {
   file_info *q = p;
   if (q != nullptr) {
@@ -275,6 +440,29 @@ int file_info_dispose(void *p) {
   }
   return 0;
 }
+
+int calc_jdist(jpair_control *q, const char *str, file_info *p) {
+  (void)str;
+  //mettre l'option display graph ici
+  size_t k = 0;
+  for (int i = 1; i < (int)q->nfiles; ++i) {
+    for (int j = i+1; j < (int)q->nfiles; ++j) {
+      if (is_in_file(p, i)) {
+        if (is_in_file(p, j)) {
+            q->arr[k].in +=1;
+        }
+        q->arr[k].un +=1;
+      }
+      else if (is_in_file(p, j)) {
+        q->arr[k].un += 1;
+      }
+      q->arr[k].jdist = 1 - ((float)q->arr[k].in/(float)q->arr[k].un);
+      ++k;
+    }
+  }
+  return 0;
+}
+
 
 int display_graph_option(const char *str, file_info *p) {
   printf("%s :\t", str);
@@ -288,6 +476,34 @@ int display_graph_option(const char *str, file_info *p) {
   return 0;
 }
 
+<<<<<<< HEAD
+bool is_in_file(file_info *p, int current_file) {
+  for (size_t i = 0; i < p->card; ++i) {
+    if (p->file_nums[i] == current_file) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
+FILE *get_input_type(char **av, int i) {
+  // Dans le cas du tiret simple ouvre l'entrée standard.
+  if (strcmp(av[i], INPUT_DIRECT) == 0) {
+    return stdin;
+  }
+  //si un fichier suit, incremente, et ouvre le fichier
+  if (strcmp(av[i], INPUT_FILE_NEXT) == 0) {
+    ++i;
+  }
+  FILE *f = fopen(av[i], "r");
+  if (f == nullptr) {
+    fprintf(stderr, "*** Failed to open the file : %s\n", av[i]);
+    return nullptr;
+  }
+  return f;
+}
+=======
 // is_word_from_diff_file : renvoie true ou false selon si le mot provient ou
 //    pas d'un autre fichier que le fichier courant.
 bool is_word_from_diff_file(file_info *p, int current_file) {
@@ -323,6 +539,7 @@ FILE *get_input_type(char **av, int i) {
   //printf("%s\n", str);
   //return 0;
 //}
+>>>>>>> 894bb4af07841749a77acc0b880878c4f95fa248
 
 // str_hashfun : fonction de hashage, renvoie le code de hashage correspondant
 //    à la chaîne de caractères passée en parametre
