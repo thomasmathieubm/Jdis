@@ -16,7 +16,6 @@
 #define I_OPTION SHORT_OPT "i"
 #define PUNCT_OPTION SHORT_OPT "p"
 
-
 #define CAPACITY_MIN 2
 #define CAPACITY_MUL 2
 
@@ -87,21 +86,21 @@ size_t str_hashfun(const char *s) {
 // est "-", vers un fichier si l'argument est un fichier valide, le pointeur nul
 // dans le cas contraire.
 /*FILE *get_input_type(char **av, int i) {
-  // Dans le cas du tiret simple ouvre l'entrée standard.
-  if (strcmp(av[i], INPUT_DIRECT) == 0) {
-    return stdin;
-  }
-  //si un fichier suit, incremente, et ouvre le fichier
-  if (strcmp(av[i], INPUT_FILE_NEXT) == 0) {
-    ++i;
-  }
-  FILE *f = fopen(av[i], "r");
-  if (f == nullptr) {
-    fprintf(stderr, "*** Failed to open the file : %s\n", av[i]);
-    return nullptr;
-  }
-  return f;
-}*/
+ * // Dans le cas du tiret simple ouvre l'entrée standard.
+ * if (strcmp(av[i], INPUT_DIRECT) == 0) {
+ *  return stdin;
+ * }
+ * //si un fichier suit, incremente, et ouvre le fichier
+ * if (strcmp(av[i], INPUT_FILE_NEXT) == 0) {
+ ++i;
+ * }
+ * FILE *f = fopen(av[i], "r");
+ * if (f == nullptr) {
+ *  fprintf(stderr, "*** Failed to open the file : %s\n", av[i]);
+ *  return nullptr;
+ * }
+ * return f;
+ * }*/
 
 //  renvoie vrai si l'entier current_file est présent dans le tableau de numéros
 //  de fichiers du pointeur associé à p, faux sinon.
@@ -117,15 +116,12 @@ bool is_in_file(file_info *p, int current_file) {
 //  display_graph_option : affiche sur l'entrée standart le nom du fichier
 //  associé à str ainsi que l'appartenance ou non aux différents fichiers lus et
 //  renvoie 0
-int display_graph_option(const char *str, file_info *p) {
-  printf("%s :\t", str);
-  for (size_t i = 0; i < p->card; ++i) {
-    for (int j = 1; j < p->file_nums[i]; ++j) {
-      printf("\t");
-    }
-    printf("x");
+int display_graph_option(int *nfiles, const char *str, file_info *p) {
+  printf("%s\t", str);
+  for(int i = 1; i < *nfiles; ++i) {
+    is_in_file(p, i) ? printf("x\t") : printf("-\t");
+    printf("\n");
   }
-  printf("\n");
   return 0;
 }
 
@@ -154,46 +150,65 @@ int calc_jdist(jpair_control *q, const char *str, file_info *p) {
 }
 
 void print_help(void) {
-    printf("Usage: jdis [OPTION]... FILE1 FILE2 [FILE]...\n\n");
-    printf("Computes Jaccard dissimilarities of sets of words in FILEs.\n\n");
-    printf("For any pair of FILEs, dissimilarity is displayed first to four decimal places,\n");
-    printf("followed by the two FILEs in the pair. A word is, by default, a maximum length\n");
-    printf("sequence of characters that do not belong to the white-space characters set.\n\n");
-    printf("Read the standard input for any FILE that is '-' on command line. The standard\n");
-    printf("input is displayed as a pair of double quotation marks in productions.\n\n");
-    printf("Program Information\n");
-    printf("  -?, --help\n");
-    printf("        Print this help message and exit.\n\n");
-    printf("  --usage\n");
-    printf("        Print a short usage message and exit.\n\n");
-    printf("  --version\n");
-    printf("        Print version information.\n\n");
-    printf("Input Control\n");
-    printf("  -i VALUE, --initial=VALUE\n");
-    printf("        Set the maximal number of significant initial letters for words to\n");
-    printf("        VALUE. 0 means without limitation. Default is 0.\n\n");
-    printf("  -p, --punctuation-like-space\n");
-    printf("        Make the punctuation characters play the same role as white-space\n");
-    printf("        characters in the meaning of words.\n\n");
-    printf("Output Control\n");
-    printf("  -g, --graph\n");
-    printf("        Suppress normal output. Instead, for each word found in any FILE, jdis\n");
-    printf("        lists the FILEs in which it does or does not appear. A header line\n");
-    printf("        indicates the FILE names: the name of the first FILE appears in the\n");
-    printf("        second column, that of the second in the third, and so on. For the\n");
-    printf("        subsequent lines, a word appears in the first column, followed by\n");
-    printf("        appearance marks: 'x' for yes, '-' for no. The list is lexicographically\n");
-    printf("        sorted. The locale specified by the environment affects the sort order.\n");
-    printf("        Set 'LC_ALL=C' or 'LC_COLLATE=C' to get the traditional sort order that\n");
-    printf("        uses native byte values.\n\n");
-    printf("File Selection\n");
-    printf("  -P LIST, --path=LIST\n");
-    printf("        Specify a list of directories in which to search for any FILE if it is\n");
-    printf("        not present in the current directory. In LIST, directory names are\n");
-    printf("        separated by colons. The order in which directories are listed is the\n");
-    printf("        order followed by jdis in its search.\n\n");
-    printf("White-space and punctuation characters conform to the standard. At most 64 FILEs\n");
-    printf("are supported.\n");
+  printf("Usage: jdis [OPTION]... FILE1 FILE2 [FILE]...\n\n");
+  printf("Computes Jaccard dissimilarities of sets of words in FILEs.\n\n");
+  printf(
+      "For any pair of FILEs, dissimilarity is displayed first to four decimal places,\n");
+  printf(
+      "followed by the two FILEs in the pair. A word is, by default, a maximum length\n");
+  printf(
+      "sequence of characters that do not belong to the white-space characters set.\n\n");
+  printf(
+      "Read the standard input for any FILE that is '-' on command line. The standard\n");
+  printf(
+      "input is displayed as a pair of double quotation marks in productions.\n\n");
+  printf("Program Information\n");
+  printf("  -?, --help\n");
+  printf("        Print this help message and exit.\n\n");
+  printf("  --usage\n");
+  printf("        Print a short usage message and exit.\n\n");
+  printf("  --version\n");
+  printf("        Print version information.\n\n");
+  printf("Input Control\n");
+  printf("  -i VALUE, --initial=VALUE\n");
+  printf(
+      "        Set the maximal number of significant initial letters for words to\n");
+  printf("        VALUE. 0 means without limitation. Default is 0.\n\n");
+  printf("  -p, --punctuation-like-space\n");
+  printf(
+      "        Make the punctuation characters play the same role as white-space\n");
+  printf("        characters in the meaning of words.\n\n");
+  printf("Output Control\n");
+  printf("  -g, --graph\n");
+  printf(
+      "        Suppress normal output. Instead, for each word found in any FILE, jdis\n");
+  printf(
+      "        lists the FILEs in which it does or does not appear. A header line\n");
+  printf(
+      "        indicates the FILE names: the name of the first FILE appears in the\n");
+  printf(
+      "        second column, that of the second in the third, and so on. For the\n");
+  printf(
+      "        subsequent lines, a word appears in the first column, followed by\n");
+  printf(
+      "        appearance marks: 'x' for yes, '-' for no. The list is lexicographically\n");
+  printf(
+      "        sorted. The locale specified by the environment affects the sort order.\n");
+  printf(
+      "        Set 'LC_ALL=C' or 'LC_COLLATE=C' to get the traditional sort order that\n");
+  printf("        uses native byte values.\n\n");
+  printf("File Selection\n");
+  printf("  -P LIST, --path=LIST\n");
+  printf(
+      "        Specify a list of directories in which to search for any FILE if it is\n");
+  printf(
+      "        not present in the current directory. In LIST, directory names are\n");
+  printf(
+      "        separated by colons. The order in which directories are listed is the\n");
+  printf("        order followed by jdis in its search.\n\n");
+  printf(
+      "White-space and punctuation characters conform to the standard. At most 64 FILEs\n");
+  printf("are supported.\n");
 }
 
 int main(int ac, char **av) {
@@ -203,36 +218,35 @@ int main(int ac, char **av) {
     fprintf(stderr, "Try 'jdis -h' for more information.\n");
     return r;
   }
-
-  setlocale(LC_COLLATE, "");
-
+  //setlocale(LC_ALL, "C");
   //  g_opt : true ou false selon que l'option graphique est détéctée ou non
-  //  i_opt : -1 ou entier strictement positif selon que l'option i soit détéctée
+  //  i_opt : -1 ou entier strictement positif selon que l'option i soit
+  // détéctée
   //    ou non.
   bool g_opt = false;
   bool p_opt = false;
   long int i_opt = -1;
-
   //  Tableaux pour stocker uniquement les fichiers à traiter, ac - 1 est la
   //    taille maximale car on retire le nom de l'executable de la liste.
   int nfiles = 0;
-  char **file_list = malloc((size_t)(ac - 1) * sizeof *file_list);
+  char **file_list = malloc((size_t) (ac - 1) * sizeof *file_list);
   if (file_list == nullptr) {
     goto error_capacity;
   }
-
   //  Traitement des eventuelles options et des fichiers
   bool input_file_next = false;
   for (int i = 1; i < ac; i++) {
     //  Cas spécifique suivant un "--" :
     if (input_file_next) {
-      file_list[nfiles++] = av[i];
+      file_list[nfiles] = av[i];
+      ++nfiles;
       input_file_next = false;
     } else if (av[i][0] == '-') {
       if (av[i][1] == '\0') {
         //  Si il n'y a pas de "--" devant alors le "-" unique est traité
         //    tel un fichier.
-        file_list[nfiles++] = av[i];
+        file_list[nfiles] = av[i];
+        ++nfiles;
       } else if (av[i][1] == '-' && av[i][2] == '\0') {
         //  Si on rencontre "--" on active un booleen qui permet de signaler
         //    sur le prochain tour de boucle qu'il faut lire en mode fichier
@@ -240,7 +254,7 @@ int main(int ac, char **av) {
       } else {
         //  Sinon c'est une option
         //  Option -h
-        if (strcmp(av[i], "HELP") == 0) {
+        if (strcmp(av[i], HELP) == 0) {
           print_help();
           return r;
           //  Option -g
@@ -271,46 +285,41 @@ int main(int ac, char **av) {
       file_list[nfiles++] = av[i];
     }
   }
-
   //  On teste si le nombre de fichiers entrés est bien supérieur à 2 car le
   //    seul test sur le nombre d'agrument est insuffisant.
   if (nfiles < 2) {
     fprintf(stderr, "Number of input files must be upper than 2\n");
     return r;
   }
-
   // Initialisation des structures et du buffer seulement après avoir traité
   //    les options et les fichiers afin d'éviter des déclarations inutiles en
   //    en cas d'erreur en amont.
-  hashtable *ht = hashtable_empty((int (*)(const void *, const void *)) strcoll,
-        (size_t (*)(const void *)) str_hashfun, 1.0);
+  hashtable *ht = hashtable_empty((int (*)(const void *, const void *))strcoll,
+      (size_t (*)(const void *))str_hashfun, 1.0);
   holdall *ha0 = holdall_empty();
   holdall *ha1 = holdall_empty();
   if (ht == nullptr || ha0 == nullptr || ha1 == nullptr) {
     goto error_capacity;
   }
-
   //buff : buffer qui stocke progressivement les lettres lus
   char *buff = malloc(BUFF_SIZE + 1);
   if (buff == nullptr) {
     goto error_capacity;
   }
-
-
   for (int file_idx = 0; file_idx < nfiles; file_idx++) {
     FILE *f = nullptr;
     if (strcmp(file_list[file_idx], INPUT_DIRECT) == 0) {
+      f = stdin;
       f = stdin;
       printf("--- starts reading for #%d FILE\n", file_idx + 1);
     } else {
       f = fopen(file_list[file_idx], "r");
       if (f == nullptr) {
         fprintf(stderr, "*** Failed to open the file : %s\n",
-                file_list[file_idx]);
+            file_list[file_idx]);
         goto error_read;
       }
     }
-
     //  i : indice du buffer
     size_t i = 0;
     int c = 0;
@@ -328,7 +337,7 @@ int main(int ac, char **av) {
           //    de -1 :
           //        - on coupe donc le mot à la longueur max_word_length
           //        - on met à jour la taille du mot coupé
-          if (i_opt != -1 && (int)i > i_opt) {
+          if (i_opt != -1 && (int) i > i_opt) {
             buff[i_opt] = '\0';
             i = (size_t) i_opt;
           } else {
@@ -349,7 +358,6 @@ int main(int ac, char **av) {
             p->file_nums[0] = file_idx + 1;
             p->card = 1;
             p->capacity = CAPACITY_MIN;
-
             char *t = malloc(i + 1);
             if (t == nullptr) {
               goto error_capacity;
@@ -366,12 +374,12 @@ int main(int ac, char **av) {
             }
           } else {
             if (p->card == p->capacity) {
-              if (p->capacity * sizeof *p->file_nums > SIZE_MAX /
-                CAPACITY_MUL) {
+              if (p->capacity * sizeof *p->file_nums > SIZE_MAX
+                  / CAPACITY_MUL) {
                 goto dispose;
               }
               int *q = realloc(p->file_nums,
-                p->capacity * CAPACITY_MUL * sizeof *p->file_nums);
+                  p->capacity * CAPACITY_MUL * sizeof *p->file_nums);
               if (q == nullptr) {
                 goto dispose;
               }
@@ -390,17 +398,16 @@ int main(int ac, char **av) {
           i = 0;
         }
       }
-      buff[i] = (char)c;
+      buff[i] = (char) c;
       ++i;
     }
-
     if (f != stdin) {
       if (!feof(f)) {
         goto error_read;
       }
       if (fclose(f) != 0) {
         fprintf(stderr, "*** Failed to close the file : %s\n",
-          file_list[file_idx]);
+            file_list[file_idx]);
         goto error;
       }
     } else {
@@ -408,7 +415,6 @@ int main(int ac, char **av) {
       printf("--- ends reading for #%d FILE\n", file_idx + 1);
     }
   }
-
   // Affichage des mots lus pour l'option graph
   if (g_opt) {
     printf("\t");
@@ -416,53 +422,47 @@ int main(int ac, char **av) {
       printf("%s\t", file_list[i]);
     }
     printf("\n");
-    if (holdall_apply_context(ha0, ht,
-          (void *(*)(void *, void *)) hashtable_search,
-          (int (*)(void *, void *)) display_graph_option) != 0) {
+    holdall_sort(ha0, (int(*)(const void *, const void *))strcoll);
+    if (holdall_apply_context2(ha0, ht,
+        (void *(*)(void *, void *))hashtable_search,
+        &nfiles, (int (*)(void *, void *, void *))display_graph_option) != 0) {
       goto dispose;
     }
   }
-
   jpair_control *jc = malloc(sizeof *jc);
   if (jc == nullptr) {
     goto dispose;
   }
   jc->nfiles = nfiles + 1;
   jc->card = (nfiles * (nfiles - 1)) / 2;
-  jc->arr = calloc((size_t)jc->card, sizeof *jc->arr);
+  jc->arr = calloc((size_t) jc->card, sizeof *jc->arr);
   if (jc->arr == nullptr) {
     goto dispose;
   }
-
-  holdall_apply_context2(ha0, ht, (void *(*)(void *, void *)) hashtable_search,
-    jc, (int (*)(void *, void *, void *)) calc_jdist);
-
+  holdall_apply_context2(ha0, ht, (void *(*)(void *, void *))hashtable_search,
+      jc, (int (*)(void *, void *, void *))calc_jdist);
   if (!g_opt) {
     size_t k = 0;
     for (int i = 1; i <= nfiles; i++) {
       for (int j = i + 1; j <= nfiles; j++) {
-        printf("%.4f\t%s\t%s\n", jc->arr[k].jdist, file_list[i-1], file_list[j-1]);
+        printf("%.4f\t%s\t%s\n", jc->arr[k].jdist, file_list[i - 1],
+            file_list[j - 1]);
         ++k;
       }
     }
   }
-
-// Désallocation :
-
+  // Désallocation :
   free(jc->arr);
   free(jc);
   free(file_list);
   free(buff);
   goto dispose;
-
 error_read:
   fprintf(stderr, "*** Error: A read error occurs\n");
   goto error;
-
 error_capacity:
   fprintf(stderr, "*** Error: Not enough memory\n");
   goto error;
-
 error:
   r = EXIT_FAILURE;
   goto dispose;
