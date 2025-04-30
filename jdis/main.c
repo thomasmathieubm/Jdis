@@ -10,7 +10,12 @@
 #define BUFF_SIZE 100
 
 #define INPUT_DIRECT "-"
-#define INPUT_FILE_NEXT "--"
+#define SHORT_OPT "-"
+#define HELP SHORT_OPT "?"
+#define GRAPHIC_OPTION SHORT_OPT "g"
+#define I_OPTION SHORT_OPT "i"
+#define PUNCT_OPTION SHORT_OPT "p"
+
 
 #define CAPACITY_MIN 2
 #define CAPACITY_MUL 2
@@ -205,6 +210,7 @@ int main(int ac, char **av) {
   //  i_opt : -1 ou entier strictement positif selon que l'option i soit détéctée
   //    ou non.
   bool g_opt = false;
+  bool p_opt = false;
   long int i_opt = -1;
 
   //  Tableaux pour stocker uniquement les fichiers à traiter, ac - 1 est la
@@ -234,14 +240,17 @@ int main(int ac, char **av) {
       } else {
         //  Sinon c'est une option
         //  Option -h
-        if (strcmp(av[i], "-h") == 0 || strcmp(av[i], "-?") == 0) {
+        if (strcmp(av[i], "HELP") == 0) {
           print_help();
           return r;
           //  Option -g
-        } else if (strcmp(av[i], "-g") == 0) {
+        } else if (strcmp(av[i], GRAPHIC_OPTION) == 0) {
           g_opt = true;
+          //  Option -p
+        } else if (strcmp(av[i], PUNCT_OPTION) == 0) {
+          p_opt = true;
           //  Option -iVALUE
-        } else if (strncmp(av[i], "-i", 2) == 0) {
+        } else if (strncmp(av[i], I_OPTION, 2) == 0) {
           char *endptr;
           i_opt = strtol(av[i] + 2, &endptr, 10);
           if (*endptr != '\0') {
@@ -308,9 +317,9 @@ int main(int ac, char **av) {
     while (c != EOF) {
       c = fgetc(f);
       // Si c'est la fin du mot, on alloue et on envoie dans le holdall & HT
-      if (isspace(c) || c == EOF) {
+      if (isspace(c) || c == EOF || (p_opt && ispunct(c))) {
         // On avance jusqu'au début du mot suivant
-        while (isspace(c) && c != EOF) {
+        while ((isspace(c) && c != EOF) || (p_opt && ispunct(c))) {
           c = fgetc(f);
         }
         // i > 0 assure que les chaines allouées ne sont pas vides
@@ -398,7 +407,6 @@ int main(int ac, char **av) {
       clearerr(f);
       printf("--- ends reading for #%d FILE\n", file_idx + 1);
     }
-
   }
 
   // Affichage des mots lus pour l'option graph
