@@ -85,9 +85,10 @@ int main(int ac, char **av) {
   if (ac < 2) {
     fprintf(stderr, "***Invalid number of input argument \n");
     fprintf(stderr, "Try 'jdis -h' for more information.\n");
-    return r;
+    goto error;
   }
   //setlocale(LC_ALL, "C");
+  setlocale(LC_COLLATE, "");
   //  g_opt : true ou false selon que l'option graphique est détéctée ou non
   //  i_opt : -1 ou entier strictement positif selon que l'option i soit
   // détéctée
@@ -106,23 +107,26 @@ int main(int ac, char **av) {
   bool input_file_next = false;
   for (int i = 1; i < ac; i++) {
     //  Cas spécifique suivant un "--" :
+    if (strcmp(av[i], "") == 0) {
+      fprintf(stderr, "jdis: Illegal filename ''. \n");
+      fprintf(stderr, "Try 'jdis -h' for more information.\n");
+      goto error;
+    }
     if (input_file_next) {
-      file_list[nfiles] = av[i];
-      ++nfiles;
+      file_list[nfiles++] = av[i];
       input_file_next = false;
     } else if (av[i][0] == '-') {
       if (av[i][1] == '\0') {
         //  Si il n'y a pas de "--" devant alors le "-" unique est traité
         //    tel un fichier.
-        file_list[nfiles] = av[i];
-        ++nfiles;
+        file_list[nfiles++] = (char *)"\"\"";
       } else if (av[i][1] == '-' && av[i][2] == '\0') {
         //  Si on rencontre "--" on active un booleen qui permet de signaler
         //    sur le prochain tour de boucle qu'il faut lire en mode fichier
         input_file_next = true;
       } else {
         //  Sinon c'est une option
-        //  Option -h
+        //  Option -?
         if (strcmp(av[i], OPT_HELP) == 0) {
           print_help();
           return r;
@@ -175,16 +179,16 @@ int main(int ac, char **av) {
   if (buff == nullptr) {
     goto error_capacity;
   }
-  for (int file_idx = 0; file_idx < nfiles; ++file_idx) {
+ for (int file_idx = 0; file_idx < nfiles; file_idx++) {
     FILE *f = nullptr;
-    if (strcmp(file_list[file_idx], INPUT_DIRECT) == 0) {
+    if (file_list[file_idx] == (char *)"\"\"") {
       f = stdin;
       printf("--- starts reading for #%d FILE\n", file_idx + 1);
     } else {
       f = fopen(file_list[file_idx], "r");
       if (f == nullptr) {
-        fprintf(stderr, "*** Failed to open the file : %s\n",
-            file_list[file_idx]);
+        fprintf(stderr, "jdis: Can't open for reading file '%s'\n",
+                file_list[file_idx]);
         goto error_read;
       }
     }
@@ -194,10 +198,10 @@ int main(int ac, char **av) {
     while (c != EOF) {
       c = fgetc(f);
       // Si c'est la fin du mot, on alloue et on envoie dans le holdall & HT
-      if (isspace(c) || c == EOF || (p_opt && ispunct(c)) 
+      if (isspace(c) || c == EOF || (p_opt && ispunct(c))
         || (i_opt != -1 && (int) i > i_opt)) {
         // On avance jusqu'au début du mot suivant
-        while ((isspace(c) && c != EOF) || (p_opt && ispunct(c)) 
+        while ((isspace(c) && c != EOF) || (p_opt && ispunct(c))
           || (i_opt > -1 && (int)i > i_opt)) {
           c = fgetc(f);
         }
