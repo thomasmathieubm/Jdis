@@ -1,0 +1,7 @@
+#!/bin/bash
+
+rm jdis.txt
+rm jdisprof.txt
+./jdis -p -g toto0.txt toto1.txt toto3.txt > jdis.txt
+./jdisprof -p -g toto0.txt toto1.txt toto3.txt > jdisprof.txt
+diff jdis.txt jdisprof.txt
